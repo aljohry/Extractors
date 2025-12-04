@@ -1,0 +1,7 @@
+__pycache__/ 
+*.pyc 
+reports/*.xml 
+reports/*.html 
+exploits/*.py 
+exploits/*.c 
+!reports/templates/report_template.html 
