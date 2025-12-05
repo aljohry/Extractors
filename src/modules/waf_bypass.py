@@ -1,63 +1,114 @@
 import subprocess
 import socket
-import requests
-import re
-from src.utils.colors import print_info, print_success, print_error
+import dns.resolver
+from urllib.parse import urlparse
+from src.utils.colors import print_info, print_success, print_error, print_step, Colors
 
-def detect_waf(domain):
-    print_info(f"Analyzing WAF signatures for: {domain}")
+def get_clean_domain(user_input):
+    """تنظيف الرابط واستخراج اسم النطاق فقط"""
+    user_input = user_input.strip()
+    if not user_input.startswith(('http://', 'https://')):
+        user_input = 'http://' + user_input
+    parsed = urlparse(user_input)
+    return parsed.netloc if parsed.netloc else user_input
+
+def detect_waf(raw_domain):
+    target = get_clean_domain(raw_domain)
+    print_info(f"Analyzing WAF signatures for: {target}")
     try:
-        # استدعاء wafw00f
-        # ملاحظة: تأكد من تثبيت الأداة على النظام أو وجودها في المسار
-        result = subprocess.run(['wafw00f', domain], capture_output=True, text=True, timeout=45)
-        
-        # البحث في المخرجات عن الجملة التي تحدد الـ WAF
-        match = re.search(r'is behind (.*?)(?: \[|$)', result.stdout, re.IGNORECASE)
-        
-        if match:
-            waf_name = match.group(1).strip()
-            print_error(f"WAF DETECTED: {waf_name}")
-            return waf_name
-        else:
-            if "No WAF detected" in result.stdout:
-                print_success("No WAF detected.")
-            else:
-                print_info("WAF scan finished (Unclear result).")
-            return None
+        subprocess.run(['wafw00f', target], check=False)
     except FileNotFoundError:
-        print_error("wafw00f tool is not installed or not in PATH.")
-        return None
+        print_error("wafw00f tool is not installed.")
     except Exception as e:
         print_error(f"WAF Detection failed: {e}")
-        return None
 
-def get_real_ip(domain):
-    print_info(f"Hunting for Real IP of {domain} (Bypassing Firewall)...")
-    
-    # 1. DNS العادي
+def resolve_dns_record(domain, record_type):
     try:
-        current_ip = socket.gethostbyname(domain)
-        print_info(f"Current DNS IP: {current_ip}")
+        answers = dns.resolver.resolve(domain, record_type)
+        return [rdata.to_text() for rdata in answers]
     except:
-        print_error("Could not resolve domain.")
+        return []
+
+def get_real_ip(raw_domain):
+    target = get_clean_domain(raw_domain)
+    print_info(f"Hunting for Real IP of [{target}]...")
+    
+    # 1. الحصول على IP الحالي (WAF)
+    try:
+        current_ip = socket.gethostbyname(target)
+        # التعديل هنا: توضيح أن هذا هو IP الفيروول
+        print(f"{Colors.BLUE}[*] Current Public IP (Likely WAF/Firewall): {current_ip}{Colors.ENDC}")
+    except:
+        print_error(f"Could not resolve domain: {target}")
         return None
 
-    # 2. محاكاة البحث عن IP مختلف عبر Subdomains (منطق مبسط لـ CloakQuest3r)
-    potential_ips = []
-    subdomains = ['ftp', 'direct', 'mail', 'dev', 'cpanel', 'webmail']
+    found_candidates = []
+
+    # === [STEP 1] Check MX Records (Email Servers) ===
+    print_step("Checking MX Records (Mail Servers)...")
+    mx_records = resolve_dns_record(target, 'MX')
     
+    if mx_records:
+        for mx in mx_records:
+            try:
+                # MX record ex: "10 mail.site.com."
+                mx_host = mx.split(' ')[1].strip('.')
+                mx_ip = socket.gethostbyname(mx_host)
+                
+                if mx_ip != current_ip:
+                    # التعديل هنا: عرض النتيجة كـ Mail Server IP وليس Real IP مؤكد
+                    print(f"{Colors.GREEN}[+] Found Mail Server (MX): {mx_host} -> {mx_ip}{Colors.ENDC}")
+                    print(f"    {Colors.YELLOW}↳ Hint: Mail servers are often on the same network as the web server.{Colors.ENDC}")
+                    found_candidates.append(mx_ip)
+            except:
+                continue
+    else:
+        print(f"    {Colors.FAIL}[-] No MX records found.{Colors.ENDC}")
+
+    # === [STEP 2] Check SPF Records ===
+    print_step("Checking SPF Records (TXT Data)...")
+    txt_records = resolve_dns_record(target, 'TXT')
+    found_spf = False
+    for txt in txt_records:
+        if "v=spf1" in txt:
+            parts = txt.replace('"', '').split(' ')
+            for part in parts:
+                if part.startswith('ip4:'):
+                    spf_ip = part.split(':')[1]
+                    if spf_ip != current_ip:
+                        print(f"{Colors.GREEN}[+] Found IP in SPF Record: {spf_ip}{Colors.ENDC}")
+                        found_candidates.append(spf_ip)
+                        found_spf = True
+    if not found_spf:
+         print(f"    {Colors.FAIL}[-] No leaked IP in SPF records.{Colors.ENDC}")
+
+    # === [STEP 3] Check Subdomains ===
+    print_step("Scanning common subdomains...")
+    subdomains = ['ftp', 'cpanel', 'webmail', 'direct', 'mail', 'dev', 'test', 'admin']
+    found_sub = False
     for sub in subdomains:
         try:
-            target = f"{sub}.{domain}"
-            ip = socket.gethostbyname(target)
-            if ip != current_ip:
-                print_success(f"Found different IP on {target}: {ip}")
-                potential_ips.append(ip)
+            sub_target = f"{sub}.{target}"
+            ip = socket.gethostbyname(sub_target)
+            if ip != current_ip and ip not in found_candidates:
+                print(f"{Colors.GREEN}[+] Found Subdomain IP ({sub_target}): {ip}{Colors.ENDC}")
+                found_candidates.append(ip)
+                found_sub = True
         except:
-            pass
+            continue
+    if not found_sub:
+        print(f"    {Colors.FAIL}[-] No unique IPs found in subdomains.{Colors.ENDC}")
 
-    if potential_ips:
-        return potential_ips[0] # إعادة أول IP وجدناه مختلف
-    
-    print_error("Could not find Real IP using basic methods.")
-    return current_ip
+    # === النتيجة النهائية ===
+    print("\n" + "="*50)
+    if found_candidates:
+        # نرجع أول مرشح لكن نترك الخيار للمستخدم
+        best_guess = found_candidates[0]
+        print(f"{Colors.CYAN}Analysis Complete. Candidates found:{Colors.ENDC}")
+        for ip in found_candidates:
+            print(f" - {ip}")
+        print(f"\n{Colors.YELLOW}[i] Recommendation: Try scanning {best_guess} manually.{Colors.ENDC}")
+        return best_guess
+    else:
+        print_error("No bypass found. The WAF is configured correctly.")
+        return current_ip
