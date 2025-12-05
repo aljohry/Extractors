@@ -44,14 +44,42 @@
 - **Multi-Format:** حفظ النتائج بصيغتي **XML** (للبيانات) و **HTML** (للعرض التقديمي).
 - **Professional Templates:** استخدام Jinja2 لإنشاء تقارير HTML نظيفة وسهلة القراءة.
 
----
+### 6. 🛠️ Installation | التثبيت
 
-## 🛠️ Installation | التثبيت
-
-لضمان عمل الأداة بكفاءة، يوصى باستخدام **Kali Linux** أو توزيعات أمنية مماثلة.
-
-### 1. Install System Tools (تثبيت أدوات النظام)
+لضمان عمل الأداة بكفاءة، يوصى باستخدام **Kali Linux** أو توزيعات أمنية مماثلة
 تأكد من تثبيت أدوات النظام التالية عبر `apt`:
 ```bash
 sudo apt update
 sudo apt install nmap wafw00f exploitdb
+git clone [https://github.com/aljohry/Extractors.git](https://github.com/aljohry/Extractors.git)
+cd Extractors
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 src/main.py
+_________________________________________________________________________________________________________________________________________________________________________________________________
+ 💻 Interface Concept | تصور الواجهة
+The tool runs via a CLI with an interactive, colored interface. Below is the concept of the main menu including the Port Selection feature:
+
+```text
+    THE EXTRACTORS
+    Auto Vulnerability Scanner & Exploit Manager
+
+[+] Project: The Full User Journey | Team: The Extractors
+================================================================================
+
+Choose an action:
+[1] Scan Target (Nmap & Vuln Check & Exploit)
+[2] Detect WAF Type
+[3] Find Real IP (Bypass WAF)
+[4] Exit
+
+Extractor-Shell > 1
+
+--- Port Selection ---
+[1] Scan All Ports (0-65535)
+[2] Scan Specific Port
+Select Port Option > _
+
+---
+
