@@ -41,17 +41,7 @@ It is built to help security researchers and students understand the attack life
 - **Multi-Format:** Saves results in both **XML** (for data) and **HTML** (for presentation).
 - **Professional Templates:** Uses Jinja2 for clean, readable HTML reports.
 
----
-
-## 🛠️ Installation | التثبيت
-
-### Prerequisites
-This tool is designed for **Kali Linux** or similar security distributions. Ensure you have the following system tools installed:
-```bash
-sudo apt update
-sudo apt install nmap wafw00f exploitdb
-
-## 💻 Interface Concept | تصور الواجهة
+### 6. 💻 Interface Concept | تصور الواجهة
 The tool runs via a CLI with an interactive, colored interface. Below is the concept of the main menu including the Port Selection feature:
 
 ```text
@@ -73,3 +63,14 @@ Extractor-Shell > 1
 [1] Scan All Ports (0-65535)
 [2] Scan Specific Port
 Select Port Option > _
+
+---
+
+## 🛠️ Installation | التثبيت
+
+### Prerequisites
+This tool is designed for **Kali Linux** or similar security distributions. Ensure you have the following system tools installed:
+```bash
+sudo apt update
+sudo apt install nmap wafw00f exploitdb
+
