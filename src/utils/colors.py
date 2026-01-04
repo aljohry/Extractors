@@ -1,22 +1,20 @@
 import os
 import sys
 
-# محاولة استيراد مكتبة colorama
+
 try:
     from colorama import init, Fore, Style
     init(autoreset=True)
     
-    # تعريف المتغيرات (لاحظ المتغير _YELLOW)
     _HEADER = Fore.MAGENTA
     _BLUE = Fore.BLUE
     _CYAN = Fore.CYAN
     _GREEN = Fore.GREEN
-    _YELLOW = Fore.YELLOW  # <--- (1) تعريف اللون هنا ضروري
+    _YELLOW = Fore.YELLOW 
     _FAIL = Fore.RED
     _ENDC = Style.RESET_ALL
     _BOLD = Style.BRIGHT
 except ImportError:
-    # في حال لم تكن المكتبة مثبتة، نضع قيماً فارغة لمنع الأخطاء
     _HEADER = ''
     _BLUE = ''
     _CYAN = ''
@@ -31,15 +29,13 @@ class Colors:
     BLUE = _BLUE
     CYAN = _CYAN
     GREEN = _GREEN
-    YELLOW = _YELLOW   # <--- (2) هذا السطر هو الذي يحل مشكلتك (كان مفقوداً)
-    WARNING = _YELLOW  # اسم بديل
+    YELLOW = _YELLOW   
+    WARNING = _YELLOW  
     FAIL = _FAIL
     ENDC = _ENDC
     BOLD = _BOLD
 
-# دوال الطباعة المساعدة
 def print_logo():
-    # لاحظ استخدام Colors.YELLOW أو Colors.CYAN هنا
     logo = f"""{Colors.BOLD}{Colors.FAIL}
     ████████╗██╗  ██╗██████╗     ███████╗██╗  ██╗████████╗██████╗  █████╗  ██████╗████████╗ ██████╗ ██████╗ ███████╗
     ╚══██╔══╝██║  ██║██╔══==╝    ██╔════╝╚██╗██╔╝╚══██╔══╝██╔══██╗██╔══██╗██╔════╝╚══██╔══╝██╔═══██╗██╔══██╗██╔════╝
