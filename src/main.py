@@ -1,10 +1,8 @@
 import sys
 import os
 
-# إضافة المسار الحالي للمكتبات لضمان استدعاء الملفات بشكل صحيح
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# استيراد الملفات مع معالجة الأخطاء
 try:
     from src.utils.colors import Colors, print_logo, print_error, print_info
     from src.modules import waf_bypass
@@ -26,14 +24,12 @@ def main_menu():
             choice = input(f"\n{Colors.YELLOW}Extractor-Shell > {Colors.ENDC}").strip()
             
             if choice == '1':
-                # --- القائمة الفرعية لاختيار المنافذ ---
                 print(f"\n{Colors.CYAN}--- Port Selection ---{Colors.ENDC}")
                 print("[1] Scan All Ports (0-65535)")
                 print("[2] Scan Specific Port")
                 
                 port_choice = input(f"{Colors.YELLOW}Select Port Option > {Colors.ENDC}").strip()
                 
-                # نطلب الـ IP بعد تحديد نوع الفحص
                 target_ip = input("Enter Target IP: ")
 
                 if port_choice == '1':
@@ -46,25 +42,20 @@ def main_menu():
                     target_port = input("Enter Target Port: ")
                 # -----------------------------------------------
 
-                # 1. Scanning
                 scan_res = scanner.run_nmap_scan(target_ip, target_port)
                 if not scan_res: continue
                 
-                # تحديث البورت المكتشف
                 detected_port = scan_res.get('port', target_port)
 
-                # 2. Vuln Check
                 exploit_info = vuln_checker.search_exploit_local(scan_res['service'], scan_res['version'])
                 risk_info = vuln_checker.get_cvss_from_nvd(scan_res['service'], scan_res['version'])
                 
-                # 3. Exploit Manager
                 if exploit_info:
                     want_dl = input(f"{Colors.CYAN}Exploit found! Download? (y/n): {Colors.ENDC}")
                     if want_dl.lower() == 'y':
                         path = exploit_manager.download_exploit(exploit_info['id'])
                         if path: exploit_manager.generate_session_guide(path, target_ip, detected_port)
 
-                # 4. Reporting
                 report_data = {
                     'ip': target_ip, 'port': detected_port,
                     'service': scan_res['service'], 'version': scan_res['version'],
