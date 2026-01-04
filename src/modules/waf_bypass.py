@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from src.utils.colors import print_info, print_success, print_error, print_step, Colors
 
 def get_clean_domain(user_input):
-    """تنظيف الرابط واستخراج اسم النطاق فقط"""
+   
     user_input = user_input.strip()
     if not user_input.startswith(('http://', 'https://')):
         user_input = 'http://' + user_input
@@ -33,10 +33,8 @@ def get_real_ip(raw_domain):
     target = get_clean_domain(raw_domain)
     print_info(f"Hunting for Real IP of [{target}]...")
     
-    # 1. الحصول على IP الحالي (WAF)
     try:
         current_ip = socket.gethostbyname(target)
-        # التعديل هنا: توضيح أن هذا هو IP الفيروول
         print(f"{Colors.BLUE}[*] Current Public IP (Likely WAF/Firewall): {current_ip}{Colors.ENDC}")
     except:
         print_error(f"Could not resolve domain: {target}")
@@ -44,19 +42,16 @@ def get_real_ip(raw_domain):
 
     found_candidates = []
 
-    # === [STEP 1] Check MX Records (Email Servers) ===
     print_step("Checking MX Records (Mail Servers)...")
     mx_records = resolve_dns_record(target, 'MX')
     
     if mx_records:
         for mx in mx_records:
             try:
-                # MX record ex: "10 mail.site.com."
                 mx_host = mx.split(' ')[1].strip('.')
                 mx_ip = socket.gethostbyname(mx_host)
                 
                 if mx_ip != current_ip:
-                    # التعديل هنا: عرض النتيجة كـ Mail Server IP وليس Real IP مؤكد
                     print(f"{Colors.GREEN}[+] Found Mail Server (MX): {mx_host} -> {mx_ip}{Colors.ENDC}")
                     print(f"    {Colors.YELLOW}↳ Hint: Mail servers are often on the same network as the web server.{Colors.ENDC}")
                     found_candidates.append(mx_ip)
@@ -65,7 +60,6 @@ def get_real_ip(raw_domain):
     else:
         print(f"    {Colors.FAIL}[-] No MX records found.{Colors.ENDC}")
 
-    # === [STEP 2] Check SPF Records ===
     print_step("Checking SPF Records (TXT Data)...")
     txt_records = resolve_dns_record(target, 'TXT')
     found_spf = False
@@ -82,7 +76,6 @@ def get_real_ip(raw_domain):
     if not found_spf:
          print(f"    {Colors.FAIL}[-] No leaked IP in SPF records.{Colors.ENDC}")
 
-    # === [STEP 3] Check Subdomains ===
     print_step("Scanning common subdomains...")
     subdomains = ['ftp', 'cpanel', 'webmail', 'direct', 'mail', 'dev', 'test', 'admin']
     found_sub = False
@@ -99,10 +92,8 @@ def get_real_ip(raw_domain):
     if not found_sub:
         print(f"    {Colors.FAIL}[-] No unique IPs found in subdomains.{Colors.ENDC}")
 
-    # === النتيجة النهائية ===
     print("\n" + "="*50)
     if found_candidates:
-        # نرجع أول مرشح لكن نترك الخيار للمستخدم
         best_guess = found_candidates[0]
         print(f"{Colors.CYAN}Analysis Complete. Candidates found:{Colors.ENDC}")
         for ip in found_candidates:
