@@ -3,11 +3,10 @@ import subprocess
 import json
 from src.utils.colors import print_info, print_success, print_error
 
-# مفتاح API الخاص بك
 NVD_API_KEY = "c750683b-e975-4039-9d85-77018c81058d"
 
 def search_exploit_local(service, version):
-    """البحث باستخدام SearchSploit محلياً"""
+   
     if not service or service == "Unknown":
         return None
 
@@ -15,22 +14,19 @@ def search_exploit_local(service, version):
     print_info(f"Searching SearchSploit for: {query}")
     
     try:
-        # تنفيذ الأمر searchsploit --json للبحث
         cmd = ['searchsploit', query, '--json']
         result = subprocess.run(cmd, capture_output=True, text=True)
         
         try:
             data = json.loads(result.stdout)
         except json.JSONDecodeError:
-            # أحياناً المخرجات لا تكون JSON صالح إذا لم توجد نتائج
             print_error("No results found in SearchSploit.")
             return None
 
         if data.get('RESULTS_EXPLOIT'):
-            # نأخذ أول نتيجة كعينة
             exploit = data['RESULTS_EXPLOIT'][0] 
             title = exploit['Title']
-            path = exploit['Path'] # مسار الـ EDB-ID
+            path = exploit['Path']  
             print_success(f"Exploit Found: {title}")
             return {'title': title, 'path': path, 'id': exploit['EDB-ID']}
         else:
@@ -44,7 +40,7 @@ def search_exploit_local(service, version):
         return None
 
 def get_cvss_from_nvd(service, version):
-    """جلب الخطورة من NVD API"""
+   
     if not service or service == "Unknown":
         return {'cve': 'N/A', 'score': 'N/A', 'severity': 'Unknown'}
 
@@ -61,7 +57,6 @@ def get_cvss_from_nvd(service, version):
                 cve_item = data['vulnerabilities'][0]['cve']
                 cve_id = cve_item['id']
                 
-                # محاولة استخراج Score v3.1
                 metrics = cve_item.get('metrics', {})
                 cvss_data = {}
                 if 'cvssMetricV31' in metrics:
