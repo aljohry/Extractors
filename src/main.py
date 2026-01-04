@@ -40,7 +40,7 @@ def main_menu():
                 else:
                     print_error("Invalid option. Defaulting to specific port scan.")
                     target_port = input("Enter Target Port: ")
-                # -----------------------------------------------
+             
 
                 scan_res = scanner.run_nmap_scan(target_ip, target_port)
                 if not scan_res: continue
@@ -82,8 +82,6 @@ def main_menu():
         except Exception as e:
             print_error(f"An unexpected error occurred: {e}")
 
-# ========================================================
-# هذا هو الجزء الأهم الذي كان مفقوداً لديك
-# ========================================================
+
 if __name__ == "__main__":
     main_menu()
