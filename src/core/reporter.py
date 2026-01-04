@@ -19,7 +19,7 @@ def generate_xml(data):
         
         tree = ET.ElementTree(root)
         
-        # تحديد مسار التقارير
+       
         base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
         reports_dir = os.path.join(base_dir, 'reports')
         
