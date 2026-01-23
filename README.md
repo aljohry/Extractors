@@ -21,7 +21,7 @@
 ### 1. 🔍 Intelligent Recon & WAF Bypass
 - **WAF Detection:** تحديد نوع جدار حماية تطبيقات الويب (باستخدام `wafw00f`).
 - **Real IP Hunting (البحث عن الـ IP الحقيقي):** محاولة تجاوز Cloudflare/WAFs بالبحث عن عنوان IP للخادم الأصلي عبر:
-    - DNS History (سجل DNS).
+    - DNS (سجل DNS).
     - Subdomain Enumeration (تعداد النطاقات الفرعية).
     - **MX Records** (سجلات خوادم البريد).
     - **SPF Records** (بيانات TXT).
@@ -51,7 +51,7 @@
 ```bash
 sudo apt update
 sudo apt install nmap wafw00f exploitdb
-git clone [https://github.com/aljohry/Extractors.git](https://github.com/aljohry/Extractors.git)
+git clone https://github.com/aljohry/Extractors
 cd Extractors
 python3 -m venv venv
 source venv/bin/activate
