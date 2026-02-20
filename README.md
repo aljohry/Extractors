@@ -59,7 +59,7 @@ sudo apt update
 sudo apt install nmap wafw00f exploitdb
 
 # Clone the repository
-git clone https://github.com/aljohry/Extractors
+git clone https://github.com/aljohry/Extractors.git
 cd Extractors
 
 # Set up a virtual environment
