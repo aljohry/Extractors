@@ -19,7 +19,7 @@ This tool was built to assist security researchers and students in understanding
 ## ✨ Key Features
 
 ### 1. 🔍 Intelligent Recon & WAF Bypass
-- **WAF Detection:** Identifies the type of Web Application Firewall (using `wafw00f`).
+- **WAF Detection:** Identifies the type of Web Application Firewall .
 - **Real IP Hunting:** Attempts to bypass Cloudflare/WAFs by discovering the origin server's IP address through:
     - **DNS Reconnaissance:** Analyzing current DNS records.
     - **Common Subdomain Check:** Testing sensitive subdomains (e.g., ftp, dev, cpanel).
@@ -71,3 +71,49 @@ pip install -r requirements.txt
 
 # Run the tool
 python3 src/main.py
+
+ 💻 Interface Concept | تصور الواجهة
+
+The tool runs via a CLI with an interactive, colored interface. Below is the concept of the main menu including the Port Selection feature:
+
+
+
+```text
+
+    THE EXTRACTORS
+
+    Auto Vulnerability Scanner & Exploit Manager
+
+
+
+[+] Project: The Full User Journey | Team: The Extractors
+
+================================================================================
+
+
+
+Choose an action:
+
+[1] Scan Target (Nmap & Vuln Check & Exploit)
+
+[2] Detect WAF Type
+
+[3] Find Real IP (Bypass WAF)
+
+[4] Exit
+
+
+
+Extractor-Shell > 1
+
+
+
+--- Port Selection ---
+
+[1] Scan All Ports (0-65535)
+
+[2] Scan Specific Port
+
+Select Port Option > _
+
+
